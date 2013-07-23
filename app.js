@@ -4,7 +4,6 @@
  */
 
 var express =require('express'),
-    sys = require('sys'),
     url = require('url'),
     path = require('path'),
     routes = require('./routes'),
