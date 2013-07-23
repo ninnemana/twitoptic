@@ -1,6 +1,6 @@
 {
   "name": "twitoptic",
-  "version": "0.0.1",
+  "version": "0.0.1-6",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -11,5 +11,15 @@
     "stylus": "*",
     "oauth": "0.9.10",
     "twit": "~1.1.8"
+  },
+  "analyze": true,
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "subdomain": "ninnemana.twitoptic",
+  "engines": {
+    "node": "0.8.x"
+  },
+  "dist": {
+    "shasum": "cbc06113eb13da8e14fb21c3bc84aaee91394dc3"
   }
 }
