@@ -1,7 +1,30 @@
 doctype 5
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+	head
+		title= title
+		link(rel='stylesheet', href='/foundation/css/normalize.css')
+		link(rel='stylesheet', href='/foundation/css/foundation.min.css')
+		script(type='text/javascript', href='/foundation/js/vendor/custom.modernizr.js')
+		style
+			html{
+				background: url('#{user.profile_background_image_url}');
+			}
+			body{
+				background:transparent;
+			}
+	body
+		div.container.top-bar.home-border.hide-for-small
+			div.attached
+				div.name
+					span
+						a(href='#') TwitOptic
+				ul.right
+					li.show-for-small
+						a(href='#') Home
+
+		block content
+
+		script(type='text/javascript', src='/foundation/js/vendor/jquery.js')
+		script(type='text/javascript', src='/foundation/js/foundation.min.js')
+		script
+			$(document).foundation();
