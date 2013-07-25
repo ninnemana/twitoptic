@@ -1,5 +1,6 @@
-var oauth = require('oauth').OAuth,
-	redis = require('redis');
+var OAuth = require('oauth').OAuth,
+	redis = require('redis'),
+	config = require('../config');
 
 var client = redis.createClient(6379, 'nodejitsudb9741802155.redis.irstack.com'),
 	authed = false;
@@ -8,8 +9,6 @@ client.auth('nodejitsudb9741802155.redis.irstack.com:f327cfe980c971946e80b8e975f
 if (!err) { authed = true; }
 
 });
-
-var client = redis.createClient(5309, 'ninnemana.twitoptic.redistogo.com');
 
 client.on('error',function(err){
 	console.log('redis error: ', err);
@@ -21,15 +20,51 @@ function Twit(token, secret){
 	this.oauthTokenSecret = secret;
 
 	// OAuth constructed object
-	this.oauth = null;
+	this.oauth = new OAuth(config.settings.twitterAuth.urls.requestToken,
+								config.settings.twitterAuth.urls.accessToken,
+								config.settings.twitterAuth.key,
+								config.settings.twitterAuth.secret,
+								'1.0',
+								null,
+								'HMAC-SHA1');
 	var _userInfo = function(){};
 }
 
 Twit.prototype = {
-	makeOAuth: function(request_token, access_token, key, secret, version, cb, enc){
-		this.oauth = new OAuth(request_token, access_token, key, secret, version, cb, enc);
+	makeOAuth: function(){
+		this.oauth = new OAuth(config.settings.twitterAuth.urls.requestToken,
+								config.settings.twitterAuth.urls.accessToken,
+								config.settings.twitterAuth.key,
+								config.settings.twitterAuth.secret,
+								'1.0',
+								null,
+								'HMAC-SHA1');
 	},
-	set_user: function(user,callback){
+	getOAuthAccessToken: function(verifier, callback){
+		this.oauth.getOAuthAccessToken(this.oauthToken, this.oauthTokenSecret, verifier,
+			function(err,oauth_access_token, oauth_access_token_secret, tweetRes){
+			if(err){
+				calback(err);
+			}else{
+				var user = tweetRes;
+				user.oauth_access_token = oauth_access_token;
+				user.oauth_access_token_secret = oauth_access_token_secret;
+
+				client.set('twitter:user:' + user.user_id, JSON.stringify(user));
+
+				var oAuthVars = {
+					oauth_access_token: oauth_access_token,
+					oauth_access_token_secret: oauth_access_token_secret,
+					oauth_verifier: verifier
+				};
+				callback(null, user, oAuthVars);
+			}
+		});
+	},
+	setUser: function(user,callback){
+		if(this.oauth == null){
+			this.makeOAuth();
+		}
 		user_str = JSON.stringify(user);
 		client.set(this.oauthToken, user_str);
 	},

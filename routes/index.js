@@ -16,8 +16,8 @@ var config = require('../config'),
 		var tw = new Twit({
 			consumer_key: config.settings.twitterAuth.key,
 			consumer_secret: config.settings.twitterAuth.secret,
-			access_token: req.session.oAuthVars.oauth_access_token,
-			access_token_secret: req.session.oAuthVars.oauth_access_token_secret
+			access_token: req.session.twitter.oAuthVars.oauth_access_token,
+			access_token_secret: req.session.twitter.oAuthVars.oauth_access_token_secret
 		});
 
 		async.parallel({
