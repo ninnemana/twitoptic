@@ -4,6 +4,7 @@ html
 		title= title
 		link(rel='stylesheet', href='/foundation/css/normalize.css')
 		link(rel='stylesheet', href='/foundation/css/foundation.min.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
 		script(type='text/javascript', href='/foundation/js/vendor/custom.modernizr.js')
 		style
 			html{
@@ -13,14 +14,34 @@ html
 				background:transparent;
 			}
 	body
-		div.container.top-bar.home-border.hide-for-small
-			div.attached
-				div.name
-					span
-						a(href='#') TwitOptic
+		nav.top-bar
+			ul.title-area
+				li.name
+					h1
+						a(href='/') TwitOptic
+				li.toggle-topbar.menu-icon
+					a(href='#')
+						span Menu
+
+			section.top-bar-section
 				ul.right
-					li.show-for-small
-						a(href='#') Home
+					if user != null
+						li.divider
+						li
+							a(href='/settings')
+								img.profile-image(src='#{user.profile_image_url}')
+					li.divider
+					li.active
+						a(href='/feed') Feed
+					li.divider
+					li
+						a(href='/feed/image') Image Feed
+					li.divider
+					li
+						a(href='/feed/video') Video Feed
+					li.divider
+					li
+						a(href='/oauth/logout') Logout
 
 		block content
 

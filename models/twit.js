@@ -1,4 +1,19 @@
-var oauth = require('oauth').OAuth;
+var oauth = require('oauth').OAuth,
+	redis = require('redis');
+
+var client = redis.createClient(6379, 'nodejitsudb9741802155.redis.irstack.com'),
+	authed = false;
+
+client.auth('nodejitsudb9741802155.redis.irstack.com:f327cfe980c971946e80b8e975fbebb4', function (err) {
+if (!err) { authed = true; }
+
+});
+
+var client = redis.createClient(5309, 'ninnemana.twitoptic.redistogo.com');
+
+client.on('error',function(err){
+	console.log('redis error: ', err);
+});
 
 function Twit(token, secret){
 	// Authentication
@@ -13,6 +28,14 @@ function Twit(token, secret){
 Twit.prototype = {
 	makeOAuth: function(request_token, access_token, key, secret, version, cb, enc){
 		this.oauth = new OAuth(request_token, access_token, key, secret, version, cb, enc);
+	},
+	set_user: function(user,callback){
+		user_str = JSON.stringify(user);
+		client.set(this.oauthToken, user_str);
+	},
+	get_user:function(name,callback){
+
+
 	},
 	userInfo: function(name, callback){
 		this.oauth.getProtectedResource(

@@ -1,7 +1,10 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.profile-image {
+  width: 30px;
 }
-a {
-  color: #00b7ff;
+.tweet {
+  min-height: 100px;
+  width: 225px;
+  background: #fff;
+  border-radius: 4px;
+  float: left;
 }

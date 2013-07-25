@@ -39,6 +39,13 @@ exports.oauth = function(req, res){
 
 exports.oauth_callback = function(req, res){
     if (req.session.hasOwnProperty('callmade')) {
+
+            // TODO
+            // ---------------------------------
+            // We need to move the logic below to use the set_user method in models/twit.js
+            // that will leverage redis for storage so we don't have to query the API
+            // unnecessarily.
+
             //var oa = makeOAuth();
             oa.getOAuthAccessToken(req.session.oAuthVars.oauth_token, req.session.oAuthVars.oauth_token_secret, req.param('oauth_verifier'),
             function(error, oauth_access_token,oauth_access_token_secret, tweetRes) {

@@ -1,5 +1,7 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title} @#{user.screen_name}
+	ul.small-block-grid-2
+		for tweet in tweets
+			li.tweet
+				p #{tweet.text}
