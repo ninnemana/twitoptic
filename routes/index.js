@@ -5,33 +5,36 @@
  
 var config = require('../config'),
 	async = require('async'),
-	Twit = require('twit');
+	Twit = require('../models/twit');
 
  exports.index = function(req, res){
- 	if(!req.session.hasOwnProperty('oAuthVars')){
+ 	if(!req.session.hasOwnProperty('oAuthVars') || !req.session.hasOwnProperty('twitter')){
  		res.redirect('/oauth');
  		return;
  	}else{
- 		console.log(req.session)
-		var tw = new Twit({
-			consumer_key: config.settings.twitterAuth.key,
-			consumer_secret: config.settings.twitterAuth.secret,
-			access_token: req.session.twitter.oAuthVars.oauth_access_token,
-			access_token_secret: req.session.twitter.oAuthVars.oauth_access_token_secret
-		});
-
+ 		if(!req.session.twitter.hasOwnProperty('user') || req.session.twitter.user == null){
+ 			res.redirect('/oauth');
+ 			return;
+ 		}
+ 		var twit = new Twit(req.session.oAuthVars.oauth_token, req.session.oAuthVars.oauth_access_token);
 		async.parallel({
 			user: function(callback){
-				tw.get('users/show',{screen_name: req.session.twitter.user.screen_name},function(err, reply){
-					callback(err,reply);
+				twit.getUser(req.session.twitter.user.screen_name,function(err, user){
+					callback(err,user);
 				});
 			},
 			tweets: function(callback){
-				tw.get('statuses/home_timeline',{screen_name: req.session.twitter.user.screen_name},function(err, reply){
-					callback(err, reply);
-				})
+				callback(null,[]);
+				// tw.get('statuses/home_timeline',{screen_name: req.session.twitter.user.screen_name},function(err, reply){
+				// 	callback(err, reply);
+				// });
 			}
 		},function(err,results){
+			if(results.user == null){
+				res.redirect('/oauth');
+				return;
+			}
+			//console.log(results);
 			console.log(err);
 			res.render('index', {title: 'TwitOptic', user: results.user, tweets: results.tweets});
 		});

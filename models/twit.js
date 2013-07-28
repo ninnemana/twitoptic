@@ -1,9 +1,11 @@
 var OAuth = require('oauth').OAuth,
 	redis = require('redis'),
-	config = require('../config');
+	config = require('../config')
+	Tweeter = require('twit');
 
 var client = redis.createClient(6379, 'nodejitsudb9741802155.redis.irstack.com'),
-	authed = false;
+	authed = false,
+	tw = {};
 
 client.auth('nodejitsudb9741802155.redis.irstack.com:f327cfe980c971946e80b8e975fbebb4', function (err) {
 if (!err) { authed = true; }
@@ -41,23 +43,36 @@ Twit.prototype = {
 								'HMAC-SHA1');
 	},
 	getOAuthAccessToken: function(verifier, callback){
+		var that = this;
 		this.oauth.getOAuthAccessToken(this.oauthToken, this.oauthTokenSecret, verifier,
 			function(err,oauth_access_token, oauth_access_token_secret, tweetRes){
 			if(err){
-				calback(err);
+				calback(err, null, null);
 			}else{
-				var user = tweetRes;
-				user.oauth_access_token = oauth_access_token;
-				user.oauth_access_token_secret = oauth_access_token_secret;
+				tw = new Tweeter({
+					consumer_key: config.settings.twitterAuth.key,
+					consumer_secret: config.settings.twitterAuth.secret,
+					access_token: oauth_access_token,
+					access_token_secret: oauth_access_token_secret
+				});
+				that.getUser(tweetRes.screen_name,function(err, reply){
+					if(err || reply == null){
+						callback(err,null,null);
+					}else{
+						var user = reply;
+						user.oauth_access_token = oauth_access_token;
+						user.oauth_access_token_secret = oauth_access_token_secret;
 
-				client.set('twitter:user:' + user.user_id, JSON.stringify(user));
+						client.set('twitter:user:' + user.screen_name, JSON.stringify(user));
 
-				var oAuthVars = {
-					oauth_access_token: oauth_access_token,
-					oauth_access_token_secret: oauth_access_token_secret,
-					oauth_verifier: verifier
-				};
-				callback(null, user, oAuthVars);
+						var oAuthVars = {
+							oauth_access_token: oauth_access_token,
+							oauth_access_token_secret: oauth_access_token_secret,
+							oauth_verifier: verifier
+						};
+						callback(null, user, oAuthVars);
+					}
+				});
 			}
 		});
 	},
@@ -68,30 +83,27 @@ Twit.prototype = {
 		user_str = JSON.stringify(user);
 		client.set(this.oauthToken, user_str);
 	},
-	get_user:function(name,callback){
-
-
+	getUser:function(name,callback){
+		if(this.oauth == null){
+			this.makeOAuth();
+		}
+		client.get('twitter:user:'+name,function(err,reply){
+			if(err || reply == null){
+				tw.get('users/show',{screen_name: name},function(err, reply){
+					callback(err,reply);
+				});
+			}else{
+				callback(err, JSON.parse(reply));
+			}
+		});
 	},
-	userInfo: function(name, callback){
-		this.oauth.getProtectedResource(
-			'https://api.twitter.com/1.1/users/show.json?screen_name='+name,
-			'GET',
-			this.oauthToken,
-			this.oauthTokenSecret,
-			function(err, data, resp){
-				var arr = [], obj, parsedData;
-				if(err){
-					console.log('error', err);
-					callback(err);
-				}else{
-					parsedData = JSON.parse(data);
-					for(var i = 0; i < parsedData.length; i++){
-						obj = {};
-					}
-				}
-			});
+	clearUser:function(name,callback){
+		if(this.oauth == null){
+			this.makeOAuth();
+		}
+		client.del(name);
+		callback(null);
 	}
-
 };
 
 exports = module.exports = Twit;

@@ -35,6 +35,7 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/oauth', oauth.oauth);
 app.get('/oauth/callback', oauth.oauth_callback);
+app.get('/oauth/logout', oauth.logout);
 //app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){

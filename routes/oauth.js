@@ -46,7 +46,6 @@ exports.oauth_callback = function(req, res){
 			var twit = new Twit(req.session.oAuthVars.oauth_token, req.session.oAuthVars.oauth_access_token);
 			twit.getOAuthAccessToken(req.param('oauth_verifier'),function(err, user, oAuthVars){
 				if(err){
-					console.log('getOAuthAccessToken error: ', err);
 					res.redirect('/oauth');
 				}else{
 					req.session.twitter = {
@@ -59,5 +58,23 @@ exports.oauth_callback = function(req, res){
 		}
 	}else {
 		res.redirect('oauth');
+	}
+};
+
+exports.logout = function(req, res){
+	if(req.session.twitter != null && req.session.twitter.user != null && req.session.twitter.user.screen_name != null){
+		var twit = new Twit(req.session.oAuthVars.oauth_token, req.session.oAuthVars.oauth_access_token);
+		twit.clearUser(req.session.twitter.user.screen_name,function(err){
+			if(err){
+				console.log('logout err: ', err);
+			}
+			req.session = null;
+			console.log(req.session);
+			res.redirect('/');
+		});
+	}else{
+		req.session = null;
+		console.log(req.session);
+		res.redirect('/');
 	}
 };
