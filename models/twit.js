@@ -89,6 +89,7 @@ Twit.prototype = {
 		}
 		client.get('twitter:user:'+name,function(err,reply){
 			if(err || reply == null){
+				console.log('hitting twitter api for getUser');
 				tw.get('users/show',{screen_name: name},function(err, reply){
 					callback(err,reply);
 				});
@@ -103,6 +104,27 @@ Twit.prototype = {
 		}
 		client.del(name);
 		callback(null);
+	},
+	getTweets:function(name,count,since_id,max_id,trim_user,callback){
+		var params = {count: 200, trim_user: false};
+		if(count !== null && count !== 0) params.count = count;
+		if(since_id !== null && since_id > 0) params.since_id = since_id;
+		if(max_id !== null && max_id > 0 ) params.max_id = max_id;
+		if(trim_user) params.trim_user = true;
+		var key = 'twitter:user:' + name + ':tweets:' + count + ':' + since_id + ':' + max_id + ':' + trim_user;
+		client.get(key,function(err, reply){
+			if(err || reply == null){
+				console.log('getting tweets from twitter');
+				tw.get('statuses/home_timeline',params,function(err, reply){
+					if(err == null){
+						client.set(key, JSON.stringify(reply));
+					}
+					callback(err, reply);
+				});
+			}else{
+				callback(err, JSON.parse(reply));
+			}
+		});
 	}
 };
 

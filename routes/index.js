@@ -24,19 +24,24 @@ var config = require('../config'),
 				});
 			},
 			tweets: function(callback){
-				callback(null,[]);
-				// tw.get('statuses/home_timeline',{screen_name: req.session.twitter.user.screen_name},function(err, reply){
-				// 	callback(err, reply);
-				// });
+				twit.getTweets(
+					req.session.twitter.user.screen_name,
+					req.params['count'] || 200,
+					req.params['since_id'] || 0,
+					req.params['max_id'] || 0,
+					req.params['trim_user'] || false,
+					function(err, tweets){
+						callback(err, tweets);
+					});
 			}
 		},function(err,results){
 			if(results.user == null){
 				res.redirect('/oauth');
 				return;
+			}else{
+				console.log(err);
+				res.render('index', {title: 'TwitOptic', user: results.user, tweets: results.tweets});
 			}
-			//console.log(results);
-			console.log(err);
-			res.render('index', {title: 'TwitOptic', user: results.user, tweets: results.tweets});
 		});
 	}
  };

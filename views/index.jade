@@ -4,4 +4,12 @@ block content
 	ul.small-block-grid-2
 		for tweet in tweets
 			li.tweet
+				div.user-info
+					a.user-image(href='https://twitter.com/#{tweet.user.screen_name}')
+						img(src='#{tweet.user.profile_image_url_https}')
+					a.user-name(href='https://twitter.com/#{tweet.user.screen_name}') #{tweet.user.name}
 				p #{tweet.text}
+				if tweet.entities.media != null
+					img(src='#{tweet.entities.media[0].media_url}', width='#{tweet.entities.media[0].sizes.thumb.w}', height='#{tweet.entities.media[0].sizes.thumb.h}')
+					div.clear
+				span #{tweet.created_at}
